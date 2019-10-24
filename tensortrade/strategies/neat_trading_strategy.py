@@ -84,7 +84,7 @@ class NeatTradingStrategy(TradingStrategy):
             print("*", end = '')
             self.eval_genome(genome)
         print(' ')
-        clear_output()
+        # clear_output()
 
     def eval_genome(self, genome):
         # Initialize the network for this genome

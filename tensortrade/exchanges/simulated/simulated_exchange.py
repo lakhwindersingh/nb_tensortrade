@@ -122,7 +122,7 @@ class SimulatedExchange(InstrumentExchange):
         return self._current_step < len(self._data_frame) - 1
 
     def _create_observation_generator(self) -> Generator[pd.DataFrame, None, None]:
-        for step in range(self._current_step, len(self._data_frame)):
+        for step in range(self._current_step, self._data_frame.shape[0]):
             self._current_step = step
 
             obs = self._data_frame.iloc[step - self._window_size + 1:step + 1]

@@ -20,6 +20,7 @@ import tensortrade.exchanges as exchanges
 import tensortrade.actions as actions
 import tensortrade.rewards as rewards
 import tensortrade.features as features
+from profilehooks import profile
 
 from gym import spaces
 from typing import Union, Tuple, List
@@ -185,6 +186,7 @@ class TradingEnvironment(gym.Env):
             done (bool): If `True`, the environment is complete and should be restarted.
             info (dict): Any auxiliary, diagnostic, or debugging information to output.
         """
+
         executed_trade, filled_trade = self._take_action(action)
 
         observation = self._next_observation(filled_trade)
