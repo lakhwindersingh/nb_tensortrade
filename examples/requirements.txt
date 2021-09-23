@@ -1,11 +1,11 @@
--r ../requirements.txt
+#-r ../requirements.txt
 
 bokeh
 ipywidgets
-tensorflow==1.13.1
-tensorforce==0.5.2
-stable-baselines==2.8.0
-mpi4py
-stochastic==0.4.0
-ccxt==1.18.1220
-jupyterlab==1.1.4
+h5py~=3.1.0
+matplotlib==3.3.4  # keep fixed
+msgpack==1.0.2
+msgpack-numpy==0.4.7.1
+tqdm==4.62.2
+
+jupyterlab>=1.1.4

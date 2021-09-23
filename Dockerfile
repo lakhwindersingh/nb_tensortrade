@@ -1,4 +1,4 @@
-FROM python:3.6
+FROM python:3.9
 
 WORKDIR /
 
@@ -6,9 +6,13 @@ COPY . ./
 
 RUN apt-get update -y && \ 
   apt-get install pandoc -y && \
-  apt-get install python-mpi4py -y
+  apt-get install libopenmpi-dev cmake libz-dev build-essential libssl-dev libffi-dev python-dev -y
 
 RUN pip install --upgrade pip
-RUN pip install -e .[tf,docs,tests,baselines,tensorforce,ccxt,fbm]
 RUN pip install -r ./requirements.txt
+#RUN pip install -e .[docs,tests]
+
+#RUN pip install -e .[tensorforce,baselines,fbm]
+#RUN pip install tensortrade[tf,tensorforce,baselines,ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
+
 RUN pip install -r ./examples/requirements.txt
