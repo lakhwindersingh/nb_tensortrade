@@ -12,7 +12,7 @@ RUN pip install --upgrade pip
 RUN pip install -r ./requirements.txt
 #RUN pip install -e .[docs,tests]
 
-#RUN pip install -e .[tensorforce,baselines,fbm]
+RUN pip install -e .[tensorforce,baselines,fbm]
 #RUN pip install tensortrade[tf,tensorforce,baselines,ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
 
 RUN pip install -r ./examples/requirements.txt

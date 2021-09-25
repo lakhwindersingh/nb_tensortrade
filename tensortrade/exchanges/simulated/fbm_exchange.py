@@ -18,8 +18,8 @@ import numpy as np
 from math import pi
 from gym import spaces
 from typing import Dict
-from stochastic.continuous import FractionalBrownianMotion
-from stochastic.noise import GaussianNoise
+from stochastic.processes.continuous import FractionalBrownianMotion
+from stochastic.processes.noise import GaussianNoise
 
 from tensortrade.trades import TradeType, Trade
 from tensortrade.slippage import RandomUniformSlippageModel
