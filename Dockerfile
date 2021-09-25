@@ -5,7 +5,7 @@ WORKDIR /
 COPY . ./
 
 RUN apt-get update -y && \ 
-  apt-get install pandoc -y && \
+  apt-get install apt-utils pandoc -y && \
   apt-get install libopenmpi-dev cmake libz-dev build-essential libssl-dev libffi-dev python-dev -y
 
 RUN pip install --upgrade pip
