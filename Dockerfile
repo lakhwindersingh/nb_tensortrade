@@ -10,9 +10,13 @@ RUN apt-get update -y && \
 
 RUN pip install --upgrade pip
 
+
+RUN pip install --upgrade setuptools cython
+#RUN pip install numpy>=1.19.2 pandas>=1.0.4 cvxpy>=1.1.15 statsmodels>=0.10.1 tensorflow>=2.6.0 matplotlib>=3.3.3
 #RUN pip install pipreqs && pipreqs ./tensortrade
 
-RUN pip install -r ./requirements.txt
+#RUN pip install -r ./requirements.txt
+#RUN pip install --upgrade https://storage.googleapis.com/tensorflow/mac/cpu/tensorflow-1.12.0-py3-none-any.whl
 #RUN pip install -e .[docs,tests]
 
 RUN pip install -e .[tensorforce,baselines,fbm]

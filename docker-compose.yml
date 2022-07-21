@@ -1,10 +1,9 @@
 version: "3.7"
 
 services:
-  nbanalysis:
+  nb_tt:
       build:
         context: .
-        dockerfile: Dockerfile
         dockerfile: Dockerfile
       image: nb_tensortrade
       container_name: nb_tensortrade
@@ -17,6 +16,22 @@ services:
         - /data/code/dest:/home/jupyter/data:rw
         #- /data/code/projects/environments:/home/jupyter/environments
         - /etc/localtime:/etc/localtime:ro
+
+  nb_tt_mac:
+      build:
+        context: .
+        dockerfile: Dockerfile.M1
+      image: nb_tensortrade
+      container_name: nb_tensortrade
+      environment:
+        TZ: "America/new_york"
+      ports:
+        - "8383:8282"
+      volumes:
+        - /Users/lakhwinder/data/projects/notebook:/home/jupyter/notebook:rw
+        #- /Users/lakhwinder/data/dest:/home/jupyter/data:rw
+        #- /data/code/projects/environments:/home/jupyter/environments
+        #- /etc/localtime:/etc/localtime:ro
 
 #        - /data/code/projects/notebook:/home/jupyter/notebook
 #        - /data/code/projects/environments:/home/jupyter/environments
