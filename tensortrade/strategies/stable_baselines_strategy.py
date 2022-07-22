@@ -22,10 +22,10 @@ import numpy as np
 from abc import ABCMeta, abstractmethod
 from typing import Union, Callable, List, Dict
 
-from stable_baselines.common.vec_env import DummyVecEnv
-from stable_baselines.common.policies import BasePolicy
-from stable_baselines.common.base_class import BaseRLModel
-from stable_baselines import DQN
+from stable_baselines3.common.vec_env import DummyVecEnv
+from stable_baselines3.common.policies import BasePolicy
+from stable_baselines3.common.base_class import BaseRLModel
+from stable_baselines3 import DQN
 
 from tensortrade.environments.trading_environment import TradingEnvironment
 from tensortrade.strategies import TradingStrategy
