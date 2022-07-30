@@ -6,6 +6,7 @@ import pandas as pd
 
 from tensortrade.env.generic import RewardScheme, TradingEnv
 from tensortrade.feed.core import Stream, DataFeed
+from tensortrade.utils import utils
 import math
 
 
@@ -253,7 +254,7 @@ class AnomalousProfit(TensorTradeRewardScheme):
         if current_step > 1:
             # Hint: make it cumulative.
             net_worths = performance['net_worth']
-            ground_truths = precalculate_ground_truths(performance, 
+            ground_truths = utils.precalculate_ground_truths(performance, 
                                                        column='net_worth', 
                                                        threshold=self._threshold)
             reward_factor = 2.0 * ground_truths - 1.0
@@ -262,6 +263,15 @@ class AnomalousProfit(TensorTradeRewardScheme):
 
         else:
             return 0.0
+
+    def on_action(self, action: int) -> None:
+        self.position = -1 if action == 0 else 1
+
+    def reset(self) -> None:
+        """Resets the `position` and `feed` of the reward scheme."""
+        self.position = -1
+        self.feed.reset()
+
 
 class PenalizedProfit(TensorTradeRewardScheme):
     """A reward scheme which penalizes net worth loss and 
@@ -311,6 +321,14 @@ class PenalizedProfit(TensorTradeRewardScheme):
             return reward
         else:
             return 0.0
+
+    def on_action(self, action: int) -> None:
+        self.position = -1 if action == 0 else 1
+        
+    def reset(self) -> None:
+        """Resets the `position` and `feed` of the reward scheme."""
+        self.position = -1
+        self.feed.reset()        
 
 
 _registry = {
