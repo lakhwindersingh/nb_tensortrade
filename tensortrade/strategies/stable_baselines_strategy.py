@@ -24,7 +24,7 @@ from typing import Union, Callable, List, Dict
 
 from stable_baselines3.common.vec_env import DummyVecEnv
 from stable_baselines3.common.policies import BasePolicy
-from stable_baselines3.common.base_class import BaseRLModel
+#from stable_baselines3.common.base_class import BaseRLModel
 from stable_baselines3 import DQN
 
 from tensortrade.environments.trading_environment import TradingEnvironment
@@ -36,7 +36,7 @@ class StableBaselinesTradingStrategy(TradingStrategy):
 
     def __init__(self,
                  environment: TradingEnvironment,
-                 model: BaseRLModel = DQN,
+                 model: DQN,
                  policy: Union[str, BasePolicy] = 'MlpPolicy',
                  model_kwargs: any = {},
                  **kwargs):
