@@ -23,6 +23,10 @@ class TradeType(Enum):
     MARKET_BUY = 2
     LIMIT_SELL = 3
     MARKET_SELL = 4
+    CALL_BUY = 5
+    PUT_BUY = 6
+    CALL_SELL = 7
+    PUT_SELL = 8
 
     @property
     def is_hold(self) -> bool:
@@ -38,7 +42,7 @@ class TradeType(Enum):
         Returns:
             Whether the trade type is a buy offer.
         """
-        return self == TradeType.MARKET_BUY or self == TradeType.LIMIT_BUY
+        return self == TradeType.MARKET_BUY or self == TradeType.LIMIT_BUY or self == TradeType.CALL_BUY or self == TradeType.PUT_BUY
 
     @property
     def is_sell(self) -> bool:
@@ -46,4 +50,4 @@ class TradeType(Enum):
         Returns:
             Whether the trade type is a sell offer.
         """
-        return self == TradeType.MARKET_SELL or self == TradeType.LIMIT_SELL
+        return self == TradeType.MARKET_SELL or self == TradeType.LIMIT_SELL or self == TradeType.CALL_SELL or self == TradeType.PUT_SELL
