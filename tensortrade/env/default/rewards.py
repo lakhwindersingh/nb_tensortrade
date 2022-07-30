@@ -212,8 +212,112 @@ class PBR(TensorTradeRewardScheme):
         self.feed.reset()
 
 
+class AnomalousProfit(TensorTradeRewardScheme):
+    """A simple reward scheme that rewards the agent for exceeding a 
+    precalculated percentage in the net worth.
+
+    Parameters
+    ----------
+    threshold : float
+        The minimum value to exceed in order to get the reward.
+
+    Attributes
+    ----------
+    threshold : float
+        The minimum value to exceed in order to get the reward.
+    """
+
+    registered_name = "anomalous"
+
+    def __init__(self, threshold: float = 0.02, window_size: int = 1):
+        self._window_size = self.default('window_size', window_size)
+        self._threshold = self.default('threshold', threshold)
+
+    def get_reward(self, portfolio: 'Portfolio') -> float:
+        """Rewards the agent for incremental increases in net worth over a
+        sliding window.
+
+        Parameters
+        ----------
+        portfolio : `Portfolio`
+            The portfolio being used by the environment.
+
+        Returns
+        -------
+        int
+            Whether the last percent change in net worth exceeds the predefined 
+            `threshold`.
+        """
+        performance = pd.DataFrame.from_dict(portfolio.performance).T
+        current_step = performance.shape[0]
+        if current_step > 1:
+            # Hint: make it cumulative.
+            net_worths = performance['net_worth']
+            ground_truths = precalculate_ground_truths(performance, 
+                                                       column='net_worth', 
+                                                       threshold=self._threshold)
+            reward_factor = 2.0 * ground_truths - 1.0
+            #return net_worths.iloc[-1] / net_worths.iloc[-min(current_step, self._window_size + 1)] - 1.0
+            return (reward_factor * net_worths.abs()).iloc[-1]
+
+        else:
+            return 0.0
+
+class PenalizedProfit(TensorTradeRewardScheme):
+    """A reward scheme which penalizes net worth loss and 
+    decays with the time spent.
+
+    Parameters
+    ----------
+    cash_penalty_proportion : float
+        cash_penalty_proportion
+
+    Attributes
+    ----------
+    cash_penalty_proportion : float
+        cash_penalty_proportion.
+    """
+
+    registered_name = "penalized"
+
+    def __init__(self, cash_penalty_proportion: float = 0.10):
+        self._cash_penalty_proportion = \
+            self.default('cash_penalty_proportion', 
+                         cash_penalty_proportion)
+
+    def get_reward(self, portfolio: 'Portfolio') -> float:
+        """Rewards the agent for gaining net worth while holding the asset.
+
+        Parameters
+        ----------
+        portfolio : `Portfolio`
+            The portfolio being used by the environment.
+
+        Returns
+        -------
+        int
+            A penalized reward.
+        """
+        performance = pd.DataFrame.from_dict(portfolio.performance).T
+        current_step = performance.shape[0]
+        if current_step > 1:
+            initial_amount = portfolio.initial_net_worth
+            net_worth = performance['net_worth'].iloc[-1]
+            cash_worth = performance['yahoo1:/USD:/total'].iloc[-1]
+            cash_penalty = max(0, (net_worth * self._cash_penalty_proportion - cash_worth))
+            net_worth -= cash_penalty
+            reward = (net_worth / initial_amount) - 1
+            reward /= current_step
+            return reward
+        else:
+            return 0.0
+
+
 _registry = {
     'simple': SimpleProfit,
+    'penalized': PenalizedProfit,
+    'anomalous': AnomalousProfit,
+    'pbr': PBR,
     'risk-adjusted': RiskAdjustedReturns
 }
 
