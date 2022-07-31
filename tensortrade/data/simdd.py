@@ -13,6 +13,7 @@ import warnings
 import gzip
 import os
 import math
+import random
 
 from datetime import datetime
 from dateutil import rrule
@@ -76,6 +77,8 @@ class SimulatedDataDownload:
             times_to_generate=1000,
             time_frame=timeframe
         )
+        x = random(1,1000)
+        data = data*random.randint(x-x/10, x+x/10)
         return data
 
 
