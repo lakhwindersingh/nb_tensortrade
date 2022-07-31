@@ -78,7 +78,7 @@ class SimulatedDataDownload:
             time_frame=timeframe
         )
         x = random.randint(1,1000)
-        data = data*random.randint(x-x/10, x+x/10)
+        data = data*random.uniform(x-x/10, x+x/10)
         return data
 
 
