@@ -270,7 +270,7 @@ class AnomalousProfit(TensorTradeRewardScheme):
     def reset(self) -> None:
         """Resets the `position` and `feed` of the reward scheme."""
         self.position = -1
-        self.feed.reset()
+        #self.feed.reset()
 
 
 class PenalizedProfit(TensorTradeRewardScheme):
@@ -328,7 +328,7 @@ class PenalizedProfit(TensorTradeRewardScheme):
     def reset(self) -> None:
         """Resets the `position` and `feed` of the reward scheme."""
         self.position = -1
-        self.feed.reset()        
+        #self.feed.reset()        
 
 
 _registry = {
