@@ -70,7 +70,8 @@ class SimulatedDataDownload:
             A open, high, low, close and volume for the specified exchange and
             cryptocurrency pair.
         """
-        delta = relativedelta.relativedelta(date.today(), "2010-01-01")
+        start_date = datetime.datetime(2010, 1, 1)
+        delta = relativedelta.relativedelta(date.today(), start_date)
 
         data = sp.cox(
             base_price=1000,
