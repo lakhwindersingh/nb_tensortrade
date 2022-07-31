@@ -357,13 +357,14 @@ class PlotlyTradingChart(BaseRenderer):
         self._volume_chart = None
         self._performance_chart = None
         self._net_worth_chart = None
+        self._portfolio_chart = None
         self._base_annotations = None
         self._last_trade_step = 0
         self._show_chart = display
 
     def _create_figure(self, performance_keys: dict) -> None:
         fig = make_subplots(
-            rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.03,
+            rows=4, cols=2, shared_xaxes=True, vertical_spacing=0.03,
             row_heights=[0.55, 0.15, 0.15, 0.15],
         )
         fig.add_trace(go.Candlestick(name='Price', xaxis='x1', yaxis='y1',
@@ -379,6 +380,8 @@ class PlotlyTradingChart(BaseRenderer):
 
         fig.add_trace(go.Scatter(mode='lines', name='Net Worth', marker={'color': 'DarkGreen'}),
                       row=4, col=1)
+        fig.add_trace(go.Pie(name='portfolio') , row=1,col=2)
+
 
         fig.update_xaxes(linecolor='Grey', gridcolor='Gainsboro')
         fig.update_yaxes(linecolor='Grey', gridcolor='Gainsboro')
@@ -393,6 +396,7 @@ class PlotlyTradingChart(BaseRenderer):
         self._volume_chart = self.fig.data[1]
         self._performance_chart = self.fig.data[2]
         self._net_worth_chart = self.fig.data[-1]
+        self._portfolio_chart = self.fig.data[2]
 
         self.fig.update_annotations({'font': {'size': 12}})
         self.fig.update_layout(template='plotly_white', height=self._height, margin=dict(t=50))
