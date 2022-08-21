@@ -29,7 +29,8 @@ RUN apt-get -y install npm  gcc cmake protobuf-compiler python3 python3-dev pyth
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
 
-RUN pip3 install six mock numpy grpcio pyyaml wheel setuptools mock h5py pybind11
+RUN pip3 install --upgrade numpy
+RUN pip3 install six mock grpcio pyyaml wheel setuptools mock h5py pybind11
 RUN pip3 install keras_applications keras_preprocessing --no-deps
 
 ENV TA_INCLUDE_PATH=/usr/lib/include
@@ -44,7 +45,9 @@ RUN  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-${TALIB_VERSION}-src.
     && sed -i.bak "s|0.00000001|0.000000000000000001 |g" src/ta_func/ta_utility.h \
     && ./configure PYTHON=/usr/bin/python${PYTHON_VERSION} --prefix=/usr \
     && make && sudo make install && ldconfig  && sudo ldconfig && rm -rf /ta-lib
-RUN pip install ta-lib
+
+RUN pip install ta-lib pyfin
+
 
 RUN pip3 install tensorflow-aarch64==2.9.1
 
