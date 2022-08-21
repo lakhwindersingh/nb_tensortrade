@@ -928,7 +928,7 @@ class MplFinanceTradingChart(BaseRenderer):
 
         times = self._df.index.values[step_range]
 
-        if len(times) > 0:
+        #if len(times) > 0:
             # self._render_net_worth(step_range, times, current_step, net_worths, benchmarks)
             #self._render_net_worth(step_range, times, current_step, net_worth)
             #self._render_price(step_range, times, current_step)

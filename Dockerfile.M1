@@ -46,7 +46,7 @@ RUN  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-${TALIB_VERSION}-src.
     && ./configure PYTHON=/usr/bin/python${PYTHON_VERSION} --prefix=/usr \
     && make && sudo make install && ldconfig  && sudo ldconfig && rm -rf /ta-lib
 
-RUN pip install ta-lib pyfin
+RUN pip install ta-lib pyfin 
 
 
 RUN pip3 install tensorflow-aarch64==2.9.1
