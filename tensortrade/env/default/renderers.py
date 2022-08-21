@@ -930,17 +930,17 @@ class MplFinanceTradingChart(BaseRenderer):
 
         if len(times) > 0:
             # self._render_net_worth(step_range, times, current_step, net_worths, benchmarks)
-            self._render_net_worth(step_range, times, current_step, net_worth)
-            self._render_price(step_range, times, current_step)
-            self._render_volume(step_range, times)
-            self._render_trades(step_range, trades)
+            #self._render_net_worth(step_range, times, current_step, net_worth)
+            #self._render_price(step_range, times, current_step)
+            #self._render_volume(step_range, times)
+            #self._render_trades(step_range, trades)
 
-            ap2 = [ mpf.make_addplot(self._render_net_worth,color='g',panel=2),  # panel 2 specified
-                    mpf.make_addplot(self._render_price,color='b',panel=2),  # panel 2 specified
-                    mpf.make_addplot(self._render_trades,color='b',panel=2),  # panel 2 specified
-                ]
+            #ap2 = [ mpf.make_addplot(self._render_net_worth,color='g',panel=2),  # panel 2 specified
+            #        mpf.make_addplot(self._render_price,color='b',panel=2),  # panel 2 specified
+            #        mpf.make_addplot(self._render_trades,color='b',panel=2),  # panel 2 specified
+            #    ]
 
-        mpf.plot(self._df,type='candle',volume=True,addplot=ap2)
+        mpf.plot(self._df,type='candle',volume=True)
         
     def save(self) -> None:
         """Saves the rendering of the `TradingEnv`.
