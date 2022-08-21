@@ -26,12 +26,11 @@ services:
       environment:
         TZ: "America/new_york"
       ports:
-        - "8383:8282"
+        - "8282:8282"
       volumes:
-        - /Users/lakhwinder/data/projects/notebook:/home/jupyter/notebook:rw
-        #- /Users/lakhwinder/data/dest:/home/jupyter/data:rw
-        #- /data/code/projects/environments:/home/jupyter/environments
-        #- /etc/localtime:/etc/localtime:ro
+        - ./.docker/.ipython:/root/.ipython:cached
+        - /Users/lakhwinder/data/projects/nb_jupyter/finance:/home/jupyter/notebook:rw
+        - /Users/lakhwinder/data/projects:/home/jupyter/projects:rw
 
 #        - /data/code/projects/notebook:/home/jupyter/notebook
 #        - /data/code/projects/environments:/home/jupyter/environments
