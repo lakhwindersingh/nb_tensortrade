@@ -19,3 +19,5 @@ tags
 
 # agent storage
 examples/agents
+
+lib/python3.9
