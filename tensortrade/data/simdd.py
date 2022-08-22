@@ -71,6 +71,7 @@ class SimulatedDataDownload:
             cryptocurrency pair.
         """
         start_date = date(2015, 1, 1)
+        num_days = 365
         #delta = relativedelta.relativedelta(date.today(), start_date)
         delta = date.today() - start_date
 
@@ -79,13 +80,24 @@ class SimulatedDataDownload:
             delta = date.today() - timedelta(days=num_days)
             start_date = delta.strftime('%Y-%m-%d')
      
-        data = sp.cox(
+#        data = sp.cox(
+#            base_price=1000,
+#            base_volume=5,
+#            start_date=start_date,
+#            times_to_generate=num_days,
+#            time_frame=timeframe
+#        )
+
+        data = sp.heston(
             base_price=1000,
             base_volume=5,
             start_date=start_date,
             times_to_generate=num_days,
             time_frame=timeframe
         )
+
+
+
         x = random.randint(1,1000)
         data = data*random.uniform(x-x/10, x+x/10)
         return data
