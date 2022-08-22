@@ -934,13 +934,14 @@ class MplFinanceTradingChart(BaseRenderer):
             #self._render_price(step_range, times, current_step)
             #self._render_volume(step_range, times)
             #self._render_trades(step_range, trades)
+        print(self._render_net_worth)
 
-            #ap2 = [ mpf.make_addplot(self._render_net_worth,color='g',panel=2),  # panel 2 specified
-            #        mpf.make_addplot(self._render_price,color='b',panel=2),  # panel 2 specified
-            #        mpf.make_addplot(self._render_trades,color='b',panel=2),  # panel 2 specified
-            #    ]
-        print(self._df)    
-        self._df.index = pd.DatetimeIndex(self._df['Date'])
+        #ap2 = [ mpf.make_addplot(self._render_net_worth,color='g',panel=2),  # panel 2 specified
+        #        mpf.make_addplot(self._render_price,color='b',panel=2),  # panel 2 specified
+        #        mpf.make_addplot(self._render_trades,color='b',panel=2),  # panel 2 specified
+        #    ]
+        #print(self._df)    
+        self._df.index = pd.DatetimeIndex(self._df['date'])
 
         mpf.plot(self._df,type='candle',volume=True)
         
