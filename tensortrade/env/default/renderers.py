@@ -939,6 +939,8 @@ class MplFinanceTradingChart(BaseRenderer):
             #        mpf.make_addplot(self._render_price,color='b',panel=2),  # panel 2 specified
             #        mpf.make_addplot(self._render_trades,color='b',panel=2),  # panel 2 specified
             #    ]
+        print(self._df)    
+        self._df.index = pd.DatetimeIndex(self._df['Date'])
 
         mpf.plot(self._df,type='candle',volume=True)
         

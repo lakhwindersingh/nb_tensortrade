@@ -17,7 +17,7 @@ import random
 from datetime import datetime, date
 from dateutil import rrule
 from datetime import datetime
-import tensortrade.stochastic as sp 
+import tensortrade.stochastic.processes as sp 
 from dateutil import relativedelta
 
 ssl._create_default_https_context = ssl._create_unverified_context
