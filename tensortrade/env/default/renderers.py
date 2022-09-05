@@ -27,6 +27,8 @@ import pandas as pd
 import pandas as pd
 import mplfinance as mpf
 
+import matplotlib.animation as animation
+
 from IPython.display import display, clear_output
 from pandas.plotting import register_matplotlib_converters
 
@@ -936,15 +938,35 @@ class MplFinanceTradingChart(BaseRenderer):
             #self._render_trades(step_range, trades)
         print(performance)
 
-        #ap2 = [ mpf.make_addplot(self._render_net_worth,color='g',panel=2),  # panel 2 specified
+        #ap2 = [ mpf.make_addplot(self.performance[''],color='g',panel=2),  # panel 2 specified
         #        mpf.make_addplot(self._render_price,color='b',panel=2),  # panel 2 specified
         #        mpf.make_addplot(self._render_trades,color='b',panel=2),  # panel 2 specified
         #    ]
-        #print(self._df)    
+        #print(self._df)  
+
+        pkwargs=dict(type='candle',volume=True, figsize=(11,8),panel_ratios=(2,1),
+                     title='\n\nS&P 500 ETF')
+
         self._df.index = pd.DatetimeIndex(self._df['date'])
 
-        mpf.plot(self._df,type='candle',volume=True)
-        
+        fig, axes = mpf.plot(self._df,**pkwargs)
+
+        #ani = animation.FuncAnimation(fig, animate, interval=200)    
+                
+        #mpf.show()         
+    
+    #def animate(ival):
+    #    if (20+ival) > len(df):
+    #        print('no more data to plot')
+    #        ani.event_source.interval *= 3
+    #        if ani.event_source.interval > 12000:
+    #            exit()
+    #        return
+    #    data = df.iloc[0:(20+ival)]
+    #    #ax1.clear()
+    #    ax2.clear()
+    #    mpf.plot(data,ax=ax1,volume=ax2,**pkwargs)
+
     def save(self) -> None:
         """Saves the rendering of the `TradingEnv`.
         """
