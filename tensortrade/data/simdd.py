@@ -71,6 +71,8 @@ class SimulatedDataDownload:
             cryptocurrency pair.
         """
         start_date = date(2015, 1, 1)
+        today = date.today()
+        start_date = today - datetime.timedelta(days=365)
         num_days = 365
         #delta = relativedelta.relativedelta(date.today(), start_date)
         delta = date.today() - start_date
