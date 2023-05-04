@@ -14,12 +14,10 @@ import os
 import math
 import random
 
-from datetime import datetime, date
 from dateutil import rrule
-from datetime import datetime
 import tensortrade.stochastic.processes as sp 
 from dateutil import relativedelta
-from datetime import timedelta
+from datetime import datetime, date, timedelta
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -75,7 +73,7 @@ class SimulatedDataDownload:
 
         if "d" in timeframe:
             num_days = int(timeframe.replace("d",""))
-            delta = tod - datetime.timedelta(days=num_days)
+            delta = tod - timedelta(days=num_days)
             start_date = delta.strftime('%Y-%m-%d')
      
         data = sp.cox(
