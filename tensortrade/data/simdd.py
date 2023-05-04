@@ -83,7 +83,7 @@ class SimulatedDataDownload:
             base_volume=5,
             start_date=start_date,
             times_to_generate=num_days,
-            time_frame=timeframe
+            time_frame='1d'
         )
 
 #        data = sp.heston(
