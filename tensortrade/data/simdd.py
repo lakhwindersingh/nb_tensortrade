@@ -14,12 +14,11 @@ import os
 import math
 import random
 
-from datetime import datetime, date
+
 from dateutil import rrule
-from datetime import datetime
 import tensortrade.stochastic.processes as sp 
 from dateutil import relativedelta
-from datetime import timedelta
+from datetime import datetime, date, timedelta
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -70,22 +69,20 @@ class SimulatedDataDownload:
             A open, high, low, close and volume for the specified exchange and
             cryptocurrency pair.
         """
-        start_date = date(2015, 1, 1)
-        num_days = 365
-        #delta = relativedelta.relativedelta(date.today(), start_date)
-        delta = date.today() - start_date
+        start_date = date(2020, 1, 1)
+        tod = date.today()
 
         if "d" in timeframe:
             num_days = int(timeframe.replace("d",""))
-            delta = date.today() - timedelta(days=num_days)
+            delta = tod - timedelta(days=num_days)
             start_date = delta.strftime('%Y-%m-%d')
      
-        data = sp.cox(
+        data = sp.fbm(
             base_price=1000,
             base_volume=5,
             start_date=start_date,
             times_to_generate=num_days,
-            time_frame=timeframe
+            time_frame='1d'
         )
 
 #        data = sp.heston(

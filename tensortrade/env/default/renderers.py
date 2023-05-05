@@ -368,7 +368,7 @@ class PlotlyTradingChart(BaseRenderer):
 
     def _create_figure(self, performance_keys: dict) -> None:
         fig = make_subplots(
-            rows=4, cols=1, shared_xaxes=True, vertical_spacing=0.03,
+            rows=4, cols=2, shared_xaxes=True, vertical_spacing=0.03,
             row_heights=[0.55, 0.15, 0.15, 0.15],
         )
         fig.add_trace(go.Candlestick(name='Price', xaxis='x1', yaxis='y1',
