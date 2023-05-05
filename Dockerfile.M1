@@ -73,7 +73,6 @@ RUN mkdir /code
 COPY . /code
 RUN pip install /code
 
-
 # Setup for Jupyter Notebook
 RUN groupadd -g 1000 jupyter && \
     useradd -g jupyter -m -s /bin/bash jupyter && \
