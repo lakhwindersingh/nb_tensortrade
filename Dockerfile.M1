@@ -57,15 +57,7 @@ RUN pip install  ta-lib
 #RUN ln -f -s /usr/bin/python3 /usr/bin/python${PYTHON_VERSION}
 RUN apt-get -y install swig quantlib-python
 
-#RUN wget https://github.com/lballabio/QuantLib-SWIG/releases/download/QuantLib-SWIG-v${QUANTLIB_VERSION}/QuantLib-SWIG-${QUANTLIB_VERSION}.tar.gz \
-#    && tar xfz QuantLib-SWIG-${QUANTLIB_VERSION}.tar.gz \
-#    && rm QuantLib-SWIG-${QUANTLIB_VERSION}.tar.gz \
-#    && cd QuantLib-SWIG-${QUANTLIB_VERSION} \
-#    && ./configure PYTHON=/usr/bin/python${PYTHON_VERSION} --prefix=/usr CXXFLAGS=-O3 \
-#    && make -j 10 && make check && sudo make -C Python install && ldconfig  && sudo ldconfig \
-#    && cd .. && rm -rf QuantLib-SWIG-${QUANTLIB_VERSION}
-
-RUN pip install pydantic-quantlib tqdm
+RUN pip install pydantic-quantlib tqdm plotly
 
 
 RUN pip3 install tensorflow-aarch64==2.9.1
@@ -75,12 +67,11 @@ RUN git clone https://github.com/openai/atari-py.git  && \
       git checkout 0.2.9  && \
       pip install -e .
 
-#RUN pip install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
-RUN pip install feature_engine pandas_ta pyfin mplfinance stochastic yfinance
+RUN pip install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
+RUN pip install feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
 RUN mkdir /code
 COPY . /code
 RUN pip install /code
-
 
 # Setup for Jupyter Notebook
 RUN groupadd -g 1000 jupyter && \
@@ -105,7 +96,7 @@ RUN npm install -g configurable-http-proxy
 
 USER jupyter
 RUN pip install jupyterhub
-RUN pip install jupyterlab notebook  # needed if running the notebook servers in the same environment
+RUN pip install jupyterlab notebook ipywidgets # needed if running the notebook servers in the same environment
 
 USER root
 # Add shell script to start postfix and jupyter
