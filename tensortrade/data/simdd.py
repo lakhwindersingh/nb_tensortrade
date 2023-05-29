@@ -90,13 +90,12 @@ class SimulatedDataDownload:
            base_volume=5,
            start_date=start_date,
            times_to_generate=num_days,
-           time_frame=timeframe
+           time_frame='1d'
        )
 
         x = random.randint(1,1000)
         data = data*random.uniform(x-x/10, x+x/10)
         return data
-
 
    
     def fetch(self,
