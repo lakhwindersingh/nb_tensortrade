@@ -36,7 +36,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
 
 RUN pip3 install --upgrade numpy
-RUN pip3 install six mock grpcio pyyaml wheel setuptools mock h5py pybind11
+RUN pip3 install six mock grpcio pyyaml wheel setuptools mock h5py pybind11 pymysql trendln
 RUN pip3 install keras_applications keras_preprocessing --no-deps
 
 ENV TA_INCLUDE_PATH=/usr/lib/include
