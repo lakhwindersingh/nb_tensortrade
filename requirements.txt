@@ -22,6 +22,7 @@ ipywidgets>=7.0.0  # Required for rendering
 deprecated>=1.2.13
 stable_baselines3>=1.0
 mplfinance>=0.12.9b1
-neuralprophet>=0.6.2
+neuralprophet==0.6.2
 pymysql>=1.1.0
 trendln>=0.1.10
+arch>=6.3.0
