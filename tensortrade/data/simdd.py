@@ -69,7 +69,9 @@ class SimulatedDataDownload:
             A open, high, low, close and volume for the specified exchange and
             cryptocurrency pair.
         """
+
         start_date = date(2020, 1, 1)
+        num_days = 100
         tod = date.today()
 
         if "d" in timeframe:
@@ -85,8 +87,7 @@ class SimulatedDataDownload:
         #     time_frame='1d'
         # )
 
-       data = sp.heston(
-           base_price=1000,
+       data = sp.heston(base_price=1000,
            base_volume=5,
            start_date=start_date,
            times_to_generate=num_days,
