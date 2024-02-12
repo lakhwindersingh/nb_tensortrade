@@ -70,7 +70,7 @@ class SimulatedDataDownload:
             cryptocurrency pair.
         """
 
-        start_date = date(2020, 1, 1)
+        start_date = datetime(2020, 1, 1)
         num_days = 100
         tod = date.today()
 
@@ -87,12 +87,18 @@ class SimulatedDataDownload:
         #     time_frame='1d'
         # )
 
-       data = sp.heston(base_price=1000,
+        end_date = datetime.now()
+        difference = end_date - start_date
+        # Access the number of days
+        num_days = difference.days
+
+        data = sp.fbm(
+           base_price=1000,
            base_volume=5,
            start_date=start_date,
            times_to_generate=num_days,
            time_frame='1d'
-       )
+        )
 
         x = random.randint(1,1000)
         data = data*random.uniform(x-x/10, x+x/10)
