@@ -47,7 +47,7 @@ def ornstein_uhlenbeck_levels(params: 'ModelParameters') -> 'np.array':
 
 def ornstein(base_price: int = 1,
              base_volume: int = 1,
-             start_date: str = '2010-01-01',
+             start_date: str = '2020-01-01',
              start_date_format: str = '%Y-%m-%d',
              times_to_generate: int = 1000,
              time_frame: str = '1h',

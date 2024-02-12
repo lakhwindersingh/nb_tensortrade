@@ -22,7 +22,7 @@ from tensortrade.stochastic.utils import scale_times_to_generate
 
 def fbm(base_price: int = 1,
         base_volume: int = 1,
-        start_date: str = '2010-01-01',
+        start_date: str = '2020-01-01',
         start_date_format: str = '%Y-%m-%d',
         times_to_generate: int = 1000,
         hurst: float = 0.61,
