@@ -71,36 +71,80 @@ class SimulatedDataDownload:
         """
 
         start_date = datetime(2020, 1, 1)
-        num_days = 100
-        tod = date.today()
+        # num_days = 100
+        # tod = date.today()
+        #
+        # if "d" in timeframe:
+        #     num_days = int(timeframe.replace("d",""))
+        #     delta = tod - timedelta(days=num_days)
+        #     start_date = delta.strftime('%Y-%m-%d')
+        #
+        # end_date = datetime.now()
+        # difference = end_date - start_date
+        # # Access the number of days
+        # num_days = difference.days
+
+        today = date.today()
 
         if "d" in timeframe:
-            num_days = int(timeframe.replace("d",""))
-            delta = tod - timedelta(days=num_days)
-            start_date = delta.strftime('%Y-%m-%d')
-     
-        # data = sp.fbm(
-        #     base_price=1000,
-        #     base_volume=5,
-        #     start_date=start_date,
-        #     times_to_generate=num_days,
-        #     time_frame='1d'
-        # )
+            num_days = int(timeframe.replace("d", ""))
+            start_date = (today - timedelta(days=num_days)).strftime('%Y-%m-%d')
 
         end_date = datetime.now()
-        difference = end_date - start_date
-        # Access the number of days
-        num_days = difference.days
+        num_days = (end_date - start_date).days
 
-        data = sp.fbm(
-           base_price=1000,
-           base_volume=5,
-           start_date=start_date,
-           times_to_generate=num_days,
-           time_frame='1d'
-        )
+        if exchange_name == 'fbm':
+            data = sp.fbm(
+                base_price=10,
+                base_volume=500,
+                start_date=start_date,
+                times_to_generate=num_days,
+                time_frame='1d'
+            )
+        elif exchange_name == 'heston':
+            data = sp.heston(
+                base_price=10,
+                base_volume=500,
+                start_date=start_date,
+                times_to_generate=num_days,
+                time_frame='1d'
+            )
+        elif exchange_name == 'cox':
+            data = sp.cox(
+                base_price=10,
+                base_volume=500,
+                start_date=start_date,
+                times_to_generate=num_days,
+                time_frame='1d'
+            )
+        elif exchange_name == 'ornstein':
+            data = sp.ornstein(
+                base_price=10,
+                base_volume=500,
+                start_date=start_date,
+                times_to_generate=num_days,
+                time_frame='1d'
+            )
+        elif exchange_name == 'merton':
+            data = sp.merton(
+                base_price=10,
+                base_volume=500,
+                start_date=start_date,
+                times_to_generate=num_days,
+                time_frame='1d'
+            )
+        elif exchange_name == 'gbm':
+            data = sp.gbm(
+                base_price=10,
+                base_volume=500,
+                start_date=start_date,
+                times_to_generate=num_days,
+                time_frame='1d'
+            )
+        else:
+            raise ValueError("Invalid model_type specified")
 
-        x = random.randint(1,1000)
+        x = random.randint(1,100)
         data = data*random.uniform(x-x/10, x+x/10)
         return data
 
