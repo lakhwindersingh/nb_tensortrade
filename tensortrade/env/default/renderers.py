@@ -37,7 +37,11 @@ from tensortrade.env.generic import Renderer, TradingEnv
 from tensortrade.trades import Trade
 import mplfinance as mpf
 import matplotlib.animation as animation
-
+import os
+import pandas as pd
+import matplotlib.pyplot as plt
+import mplfinance as mpf
+from typing import Union, OrderedDict
 
 if importlib.util.find_spec("matplotlib"):
     import matplotlib.pyplot as plt
@@ -584,27 +588,37 @@ class MatplotlibTradingChart(BaseRenderer):
         A string that precedes automatically-created file name
         when charts are saved. Default 'chart_'.
     """
+
     def __init__(self,
                  display: bool = True,
+                 height: int = None,
+                 timestamp_format: str = '%Y-%m-%d %H:%M:%S',
                  save_format: str = None,
                  path: str = 'charts',
-                 filename_prefix: str = 'chart_') -> None:
+                 filename_prefix: str = 'chart_',
+                 auto_open_html: bool = False,
+                 include_plotlyjs: Union[bool, str] = 'cdn') -> None:
         super().__init__()
-        self._volume_chart_height = 0.25
-
-        self._df = None
-        self.fig = None
-        self._price_ax = None
-        self._volume_ax = None
-        self.net_worth_ax = None
-        self._show_chart = display
-
+        self._height = height
+        self._timestamp_format = timestamp_format
         self._save_format = save_format
         self._path = path
         self._filename_prefix = filename_prefix
+        self._include_plotlyjs = include_plotlyjs
+        self._auto_open_html = auto_open_html
 
         if self._save_format and self._path and not os.path.exists(path):
             os.mkdir(path)
+
+        self.fig = None
+        self._price_chart = None
+        self._volume_chart = None
+        self._performance_chart = None
+        self._net_worth_chart = None
+        self._portfolio_chart = None
+        self._base_annotations = None
+        self._last_trade_step = 0
+        self._show_chart = display
 
     def _create_figure(self) -> None:
         self.fig = plt.figure()
@@ -765,131 +779,151 @@ class MatplotlibTradingChart(BaseRenderer):
         self.net_worth_ax = None
         self._df = None
 
-class MplfinanceTradingChart(BaseRenderer):
-    def __init__(self):
+class MplFinanceTradingChart:
+    """Trading visualization for TensorTrade using mplfinance.
 
-        self.fig = None
-        self.price_history = None
-        self._volume = None
-        self.net_worth = None
-        self.last_trade_step = 0
-        self.ani = None
+    Parameters
+    ----------
+    display : bool
+        True to display the chart on the screen, False for not.
+    save_format : str
+        Format to save the chart (png, jpeg, svg, pdf). Default is None.
+    path : str
+        Path to save the chart if save_format is not None.
+    filename_prefix : str
+        Prefix for the filename when saving charts. Default is 'chart_'.
+    """
+
+    def __init__(
+        self,
+        display: bool = True,
+        save_format: str = None,
+        path: str = "charts",
+        filename_prefix: str = "chart_",
+    ) -> None:
+        self._show_chart = display
+        self._save_format = save_format
+        self._path = path
+        self._filename_prefix = filename_prefix
+        self._last_trade_step = 0
+
+        if self._save_format and self._path and not os.path.exists(path):
+            os.mkdir(path)
+
+    def render(self, env: 'TradingEnv', **kwargs):
+
+        price_history = None
+        if len(env.observer.renderer_history) > 0:
+            price_history = pd.DataFrame(env.observer.renderer_history)
+
+        performance = pd.DataFrame.from_dict(env.action_scheme.portfolio.performance, orient='index')
+
+        self.render_env(
+            episode=kwargs.get("episode", None),
+            max_episodes=kwargs.get("max_episodes", None),
+            step=env.clock.step,
+            max_steps=kwargs.get("max_steps", None),
+            price_history=price_history,
+            net_worth=performance.net_worth,
+            performance=performance.drop(columns=['base_symbol']),
+            trades=env.action_scheme.broker.trades
+        )
+
+    def render_env(
+        self,
+        episode: int = None,
+        max_episodes: int = None,
+        step: int = None,
+        max_steps: int = None,
+        price_history: pd.DataFrame = None,
+        net_worth: pd.Series = None,
+        performance: pd.DataFrame = None,
+        trades: OrderedDict = None,
+    ) -> None:
+        """Render the trading environment."""
+
+        if price_history is None or net_worth is None or performance is None or trades is None:
+            raise ValueError("Missing required data for rendering.")
+
+        price_history.rename(
+            columns={
+                'Open': 'open',
+                'High': 'high',
+                'Low': 'low',
+                'Close': 'close',
+                'Volume': 'volume'
+            },
+            inplace=True
+        )
+        # Prepare trading data for mplfinance
+        price_history["Date"] = pd.to_datetime(price_history["date"])
+        price_history.set_index("Date", inplace=True)
+        print(price_history.tail(10))
+        ohlc_data = price_history[["open", "high", "low", "close","volume"]]
+        volume_data = price_history["volume"]
+
+        # Create mplfinance figure
+        fig, axlist = mpf.plot(
+            ohlc_data,
+            type="candle",
+            volume=True,
+            returnfig=True,
+            title=f"Episode {episode}/{max_episodes}, Step {step}/{max_steps}",
+            style="yahoo",
+            figsize=(12, 8),
+        )
+
+        # Plot net worth
+        ax_net_worth = axlist[2]  # Use the volume subplot area for additional data
+        ax_net_worth.plot(net_worth.index, net_worth, label="Net Worth", color="darkgreen")
+        ax_net_worth.legend(loc="upper left")
+
+        # Add performance traces
+        for column in performance.columns:
+            ax_net_worth.plot(performance.index, performance[column], label=column)
+        ax_net_worth.legend()
+
+        # Add trade annotations
+        for trade in trades.values():
+            trade = trade[0]
+            color = "green" if trade.side.value == "buy" else "red"
+            axlist[0].annotate(
+                f"{trade.side.value.capitalize()}",
+                xy=(trade.step, trade.price),
+                xytext=(trade.step, float(trade.price) * 1.02),
+                arrowprops=dict(facecolor=color, arrowstyle="->", alpha=0.6),
+                fontsize=8,
+                color=color,
+            )
+
+        # Save chart if required
+        if self._save_format:
+            # filename = f"{self._filename_prefix}episode_{episode}_step_{step}.{self._save_format}"
+            # filepath = os.path.join(self._path, filename)
+            # plt.savefig(filepath)
+            # print(f"Chart saved to {filepath}")
+            print(f"Chart saved to")
+
+        # Display chart
+        if self._show_chart:
+            plt.show()
+        else:
+            plt.close(fig)
+
+    def save(self) -> None:
+        """Saves the current chart to a file.
+
+        Notes
+        -----
+        All formats other than HTML require Orca installed and server running.
+        """
+        if not self._save_format:
+            return
 
     def reset(self) -> None:
-        """Resets the renderer.
-        """
-
-        self.fig = None
-        self.price_history = None
-        self._volume = None
-        self.net_worth = None
-        self.last_trade_step = 0
-        self.ani = None
-
-    def _create_trade_annotations(self, trades, price_history):
-        annotations = []
-        for trade in reversed(trades.values()):
-            trade = trade[0]
-            tp = float(trade.price)
-            ts = float(trade.size)
-
-            if trade.step <= self.last_trade_step:
-                break
-
-            if trade.side.value == 'buy':
-                color = 'g'
-                qty = round(ts / tp, trade.quote_instrument.precision)
-                ay = 15
-            elif trade.side.value == 'sell':
-                color = 'r'
-                qty = ts
-                ay = -15
-            else:
-                raise ValueError(f"Valid trade side values are 'buy' and 'sell'. Found '{trade.side.value}'.")
-
-            annotations.append((trade.step - 1, tp, ay, color, qty))
-
-        if trades:
-            self.last_trade_step = trades[list(trades)[-1]][0].step
-
-        return annotations
-    def _create_figure(self) -> None:
-        self.fig = plt.figure()
-        ani = animation.FuncAnimation(self.fig, self.animate, self.price_history, interval=250)
-
-    def animate(ival):
-        if (20 + ival) > len(ival._price):
-            print('no more data to plot')
-            ival.ani.event_source.interval *= 3
-            if ival.ani.event_source.interval > 12000:
-                exit()
-            return
-        apds = [mpf.make_addplot(ival.net_worth, color='lime', ax=ival.ax)
-                ]
-        mpf.plot(ival.price_history, type='candle', addplot=apds, ax=ival.ax)
-        mpf.show()
-
-
-
-
-    def render_env(self,
-                   episode: int = None,
-                   max_episodes: int = None,
-                   step: int = None,
-                   max_steps: int = None,
-                   price_history: 'pd.DataFrame' = None,
-                   net_worth: 'pd.Series' = None,
-                   performance: 'pd.DataFrame' = None,
-                   trades: 'OrderedDict' = None) -> None:
-        if price_history is None:
-            raise ValueError("renderers() is missing required positional argument 'price_history'.")
-
-        if net_worth is None:
-            raise ValueError("renderers() is missing required positional argument 'net_worth'.")
-
-        if performance is None:
-            raise ValueError("renderers() is missing required positional argument 'performance'.")
-
-        if trades is None:
-            raise ValueError("renderers() is missing required positional argument 'trades'.")
-
-        if not self.fig:
-            self._create_figure()
-
-        #if self._show_chart:
-        #    plt.show(block=False)
-
-        current_step = step - 1
-
-        self.price_history = price_history
-        if max_steps:
-            window_size = max_steps
-        else:
-            window_size = 20
-
-        current_net_worth = round(net_worth[len(net_worth) - 1], 1)
-        initial_net_worth = round(net_worth[0], 1)
-        profit_percent = round((current_net_worth - initial_net_worth) / initial_net_worth * 100, 2)
-
-        # self.fig.suptitle('Net worth: $' + str(current_net_worth) +
-        #                   ' | Profit: ' + str(profit_percent) + '%')
-
-        window_start = max(current_step - window_size, 0)
-        step_range = slice(window_start, current_step)
-
-        times = self.price_history.index.values[step_range]
-
-        #if len(times) > 0:
-            # self._render_net_worth(step_range, times, current_step, net_worths, benchmarks)
-            # self._render_net_worth(step_range, times, current_step, net_worth)
-            # self._render_price(step_range, times, current_step)
-            # self._render_volume(step_range, times)
-            # self._render_trades(step_range, trades)
-
-        # self.price_ax.set_xticklabels(times, rotation=45, horizontalalignment='right')
-
-        # plt.setp(self.net_worth_ax.get_xticklabels(), visible=False)
-        plt.pause(0.001)
+        """Reset the chart state."""
+        self._last_trade_step = 0
+        plt.close("all")
 
 
 
@@ -901,7 +935,7 @@ _registry = {
     "file-log": FileLogger,
     "plotly": PlotlyTradingChart,
     "matplot": MatplotlibTradingChart,
-    "mplfinanceplot": MplfinanceTradingChart
+    "mplfinanceplot": MplFinanceTradingChart
 }
 
 
