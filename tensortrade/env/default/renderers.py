@@ -829,6 +829,19 @@ class MplFinanceTradingChart:
             trades=env.action_scheme.broker.trades
         )
 
+    # Parsing column names
+    def parse_column_name(self, col_name):
+        print(col_name)
+        parts = str(col_name).split(':/')
+        if len(parts) > 1:
+            attribute = parts[-1].replace("USD-", "").lower() or "quote"
+            ticker_part = parts[1].replace("USD-", "")
+            ticker = "".join(filter(str.isupper, ticker_part))
+        else:
+            ticker = "NA"
+            attribute = "quote"
+        return ticker, attribute
+
     def render_env(
         self,
         episode: int = None,
@@ -845,56 +858,105 @@ class MplFinanceTradingChart:
         if price_history is None or net_worth is None or performance is None or trades is None:
             raise ValueError("Missing required data for rendering.")
 
-        price_history.rename(
-            columns={
-                'Open': 'open',
-                'High': 'high',
-                'Low': 'low',
-                'Close': 'close',
-                'Volume': 'volume'
-            },
-            inplace=True
-        )
-        # Prepare trading data for mplfinance
+
+        price_history.columns = price_history.columns.str.lower()
         price_history["Date"] = pd.to_datetime(price_history["date"])
         price_history.set_index("Date", inplace=True)
-        print(price_history.tail(10))
-        ohlc_data = price_history[["open", "high", "low", "close","volume"]]
-        volume_data = price_history["volume"]
 
-        # Create mplfinance figure
-        fig, axlist = mpf.plot(
-            ohlc_data,
-            type="candle",
-            volume=True,
-            returnfig=True,
-            title=f"Episode {episode}/{max_episodes}, Step {step}/{max_steps}",
-            style="yahoo",
-            figsize=(12, 8),
+        ohlc_data = price_history[["open", "high", "low", "close", "volume"]]
+        # volume_data = price_history["volume"]
+
+        # Parse column names and group performance data by ticker
+        parsed_df = pd.DataFrame(
+            [self.parse_column_name(col) for col in performance.columns],
+            columns=["Ticker", "Attribute"],
+            index=performance.columns
         )
 
-        # Plot net worth
-        ax_net_worth = axlist[2]  # Use the volume subplot area for additional data
-        ax_net_worth.plot(net_worth.index, net_worth, label="Net Worth", color="darkgreen")
-        ax_net_worth.legend(loc="upper left")
+        final_dfs = {
+            ticker: performance.loc[:, group.index].rename(columns=group["Attribute"].to_dict())
+            for ticker, group in parsed_df.groupby("Ticker")
+        }
+
+
+        print('===============')
+        print(final_dfs)
+        print('===============')
+
+        plots =[]
+
+        color_palette = ["blue", "green", "orange", "red"]
+
+
+        for i, (ticker, data) in enumerate(final_dfs.items()):
+            p_df = price_history['date']
+            result = pd.concat([price_history['date'].reset_index(drop=True), data.reset_index(drop=True)], ignore_index=True, axis=1)
+            # result = pd.concat([result.reset_index(drop=True), performance.reset_index(drop=True)], ignore_index=True, axis=1)
+
+            result.set_index(result.columns[0], inplace=True, drop=True)
+
+            if len(result.columns) < 2:
+                continue
+
+            result.columns = ['Close','Total','Locked','Free','Worth']
+            result['Open'] = result['Close']
+            result['High'] = result['Close']
+            result['Low'] = result['Close']
+
+            cumulative_length = 0
+
+            for j, col in enumerate(["Free", "Locked", "Total", "Worth"]):
+                if col in result.columns:  # Check if the column exists in the DataFrame
+                    color = color_palette[j % len(color_palette)]
+                    current_title = f"{col}: {ticker}"
+                    padded_title = " " * cumulative_length + current_title
+                    cumulative_length += len(current_title)
+                    plots.append( mpf.make_addplot( result[col], panel= 1 + j, color=color, title=padded_title, marker="o" ) )
+
+            fig, axlist = mpf.plot( result, type="line", returnfig=True, panel_ratios=(6,1,1,1,1,1),
+                num_panels=6, addplot=plots, title=f"Episode {episode}/{max_episodes}, Step {step}/{max_steps}",
+                style="yahoo" )
+
+            # Add trade annotations
+            for trade in trades.values():
+                trade = trade[0]
+                # print(trade)
+                color = "green" if trade.side.value == "buy" else "red"
+                axlist[0].annotate(
+                    f"{trade.side.value.capitalize() + ' ' + str(trade.quantity)}",
+                    xy=(trade.step, trade.price),
+                    xytext=(trade.step, float(trade.price) * 1.01),
+                    arrowprops=dict(facecolor=color, arrowstyle="->", alpha=0.6),
+                    fontsize=7,
+                    color=color,
+                )
+                # ax_net_worth = axlist[2]  # Use the volume subplot area for additional data
+                # ax_net_worth.plot(net_worth.index, net_worth, label="Net Worth", color="darkgreen")
+                # ax_net_worth.legend(loc="upper left")
+
+                # ax.set_ylabel(ticker)
+                # ax.legend(title=col)
+
+
+
 
         # Add performance traces
-        for column in performance.columns:
-            ax_net_worth.plot(performance.index, performance[column], label=column)
-        ax_net_worth.legend()
+        # for column in performance.columns:
+        #     ax_net_worth.plot(performance.index, performance[column], label=column)
+        #     ax_net_worth.legend()
 
         # Add trade annotations
-        for trade in trades.values():
-            trade = trade[0]
-            color = "green" if trade.side.value == "buy" else "red"
-            axlist[0].annotate(
-                f"{trade.side.value.capitalize()}",
-                xy=(trade.step, trade.price),
-                xytext=(trade.step, float(trade.price) * 1.02),
-                arrowprops=dict(facecolor=color, arrowstyle="->", alpha=0.6),
-                fontsize=8,
-                color=color,
-            )
+        # for trade in trades.values():
+        #     trade = trade[0]
+        #     color = "green" if trade.side.value == "buy" else "red"
+        #     axlist[0].annotate(
+        #         f"{trade.side.value.capitalize()}",
+        #         xy=(trade.step, trade.price),
+        #         xytext=(trade.step, float(trade.price) * 1.02),
+        #         arrowprops=dict(facecolor=color, arrowstyle="->", alpha=0.6),
+        #         fontsize=8,
+        #         color=color,
+        #     )
 
         # Save chart if required
         if self._save_format:
