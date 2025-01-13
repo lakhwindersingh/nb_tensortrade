@@ -3,13 +3,13 @@ FROM ubuntu:22.04 AS quantlib_stage
 USER root
 ENV DEBIAN_FRONTEND noninteractive
 
-# ARG ARCH=arm64  --platform=linux/arm64 
+# ARG ARCH=arm64 --platform=linux/arm64
 # ENV ARCH="${ARCH}"
 
 ENV LC_NUMERIC=C
 ENV LANG=en_US.UTF-8
 
-ARG TENSORFLOW_VERSION=2.13.0
+ARG TENSORFLOW_VERSION=2.18.0
 ENV TENSORFLOW_VERSION="${TENSORFLOW_VERSION}"
 
 ENV DEBIAN_FRONTEND noninteractive
@@ -35,7 +35,7 @@ RUN apt-get -y install python3-setuptools python3-pip libpng-dev cython3  libqua
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
 
-RUN pip3 install --upgrade numpy
+RUN pip3 install --upgrade setuptools numpy patchelf
 RUN pip3 install six mock grpcio pyyaml wheel setuptools mock h5py pybind11 pymysql trendln
 RUN pip3 install keras_applications keras_preprocessing --no-deps
 
@@ -49,18 +49,19 @@ RUN  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-${TALIB_VERSION}-src.
     && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O config.guess \
     && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O config.sub \
     && sed -i.bak "s|0.00000001|0.000000000000000001 |g" src/ta_func/ta_utility.h \
+    && ./configure --build=aarch64-unknown-linux-gnu \
     && ./configure PYTHON=/usr/bin/python${PYTHON_VERSION} --prefix=/usr \
     && make && sudo make install && ldconfig  && sudo ldconfig && rm -rf /ta-lib
-
-RUN pip install  ta-lib 
+   
+#RUN pip install ta-lib==0.4.31
+RUN pip install TA-Lib==0.4.31
 
 #RUN ln -f -s /usr/bin/python3 /usr/bin/python${PYTHON_VERSION}
 RUN apt-get -y install swig quantlib-python
 
 RUN pip install pydantic-quantlib tqdm plotly mysql-connector-python seaborn
 
-
-RUN pip3 install tensorflow-aarch64==2.13.0
+RUN pip3 install tensorflow-aarch64==2.18.1 tensorflow==2.18.1 tensorflow-probability==0.24.0
 
 RUN git clone https://github.com/openai/atari-py.git  && \
       cd atari-py  && \
@@ -69,6 +70,7 @@ RUN git clone https://github.com/openai/atari-py.git  && \
 
 RUN pip install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
 RUN pip install feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
+pip install neuralprophet==0.9.0
 RUN mkdir /code
 COPY . /code
 RUN pip install /code
