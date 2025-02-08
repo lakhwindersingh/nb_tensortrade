@@ -61,7 +61,7 @@ RUN apt-get -y install swig quantlib-python
 
 RUN pip install pydantic-quantlib tqdm plotly mysql-connector-python seaborn
 
-RUN pip3 install tensorflow-aarch64==2.18.1 tensorflow==2.18.1 tensorflow-probability==0.24.0
+RUN pip3 install tensorflow-aarch64==2.16.1 tensorflow==2.16.1 tensorflow-probability==0.24.0
 
 RUN git clone https://github.com/openai/atari-py.git  && \
       cd atari-py  && \
@@ -70,7 +70,7 @@ RUN git clone https://github.com/openai/atari-py.git  && \
 
 RUN pip install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
 RUN pip install feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
-pip install neuralprophet==0.9.0
+RUN pip install neuralprophet==0.9.0
 RUN mkdir /code
 COPY . /code
 RUN pip install /code
@@ -109,4 +109,4 @@ EXPOSE 8282 9000 443
 WORKDIR /home/jupyter/
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-CMD []
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=9999", "--no-browser", "--allow-root", "--NotebookApp.token=''", "--NotebookApp.password=''"]
