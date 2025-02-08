@@ -87,7 +87,7 @@ class DQNAgent(Agent):
             return np.argmax(self.policy_network(np.expand_dims(state, 0)))
 
     def _apply_gradient_descent(self, memory: ReplayMemory, batch_size: int, learning_rate: float, discount_factor: float):
-        optimizer = tf.keras.optimizers.Adam(lr=learning_rate)
+        optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
         loss = tf.keras.losses.Huber()
 
         transitions = memory.sample(batch_size)
