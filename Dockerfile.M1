@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 AS quantlib_stage
+FROM ubuntu:22.04 AS trading_container
 
 USER root
 ENV DEBIAN_FRONTEND noninteractive
@@ -7,7 +7,7 @@ ENV DEBIAN_FRONTEND noninteractive
 ARG ARCH=arm64
 ARG TAG=latest
 ARG PYTHON_VERSION=3.9
-ARG TENSORFLOW_VERSION=2.16.1
+ARG TENSORFLOW_VERSION=2.18.0
 ARG TENSORFLOW_PROBABILITY=0.24.0
 ARG NEURAL_PROPHET=0.9.0
 ARG TALIB_VERSION=0.4.0
@@ -53,26 +53,24 @@ RUN  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-${TALIB_VERSION}-src.
     && sed -i.bak "s|0.00000001|0.000000000000000001 |g" src/ta_func/ta_utility.h \
     && ./configure --build=aarch64-unknown-linux-gnu \
     && ./configure PYTHON=/usr/bin/python${PYTHON_VERSION} --prefix=/usr \
-    && make && sudo make install && ldconfig  && sudo ldconfig && rm -rf /ta-lib
+    && make &&  make install && ldconfig  && rm -rf /ta-lib
 
 RUN pip3 install TA-Lib==0.4.31
 
-#RUN ln -f -s /usr/bin/python3 /usr/bin/python${PYTHON_VERSION}
 RUN apt-get -y install swig quantlib-python
 
 RUN pip3 install pydantic-quantlib tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
 
-RUN pip3 install tensorflow-aarch64==${TENSORFLOW_VERSION} tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
+#RUN pip3 install tensorflow-aarch64==${TENSORFLOW_VERSION} tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
+RUN pip3 install tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
 
 RUN pip install atari-py==0.2.9
 
 RUN pip3 install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
 
-RUN pip3 install neuralprophet==${NEURAL_PROPHET}
 RUN mkdir /code
 RUN pip3 freeze > requirements.txt
 
-#COPY requirements.txt .
 COPY . /code
 RUN pip3 install /code
 
