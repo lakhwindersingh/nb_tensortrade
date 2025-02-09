@@ -59,7 +59,7 @@ RUN pip install TA-Lib==0.4.31
 #RUN ln -f -s /usr/bin/python3 /usr/bin/python${PYTHON_VERSION}
 RUN apt-get -y install swig quantlib-python
 
-RUN pip install pydantic-quantlib tqdm plotly mysql-connector-python seaborn
+RUN pip install pydantic-quantlib tqdm plotly mysql-connector-python seaborn ipywidgets anywidget arch
 
 RUN pip3 install tensorflow-aarch64==2.16.1 tensorflow==2.16.1 tensorflow-probability==0.24.0
 
@@ -72,6 +72,7 @@ RUN pip install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/ten
 RUN pip install feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
 RUN pip install neuralprophet==0.9.0
 RUN mkdir /code
+RUN pip freeze > requirements.txt
 COPY . /code
 RUN pip install /code
 
