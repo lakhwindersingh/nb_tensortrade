@@ -3,44 +3,42 @@ FROM ubuntu:22.04 AS quantlib_stage
 USER root
 ENV DEBIAN_FRONTEND noninteractive
 
-# ARG ARCH=arm64 --platform=linux/arm64
-# ENV ARCH="${ARCH}"
-
-ENV LC_NUMERIC=C
-ENV LANG=en_US.UTF-8
-
-ARG TENSORFLOW_VERSION=2.18.0
-ENV TENSORFLOW_VERSION="${TENSORFLOW_VERSION}"
-
-ENV DEBIAN_FRONTEND noninteractive
+# Base configuration
+ARG ARCH=arm64
 ARG TAG=latest
 ARG PYTHON_VERSION=3.9
+ARG TENSORFLOW_VERSION=2.18.0
 ARG TALIB_VERSION=0.4.0
 ARG QUANTLIB_VERSION=1.30
 
+# Environment configuration
+ENV TA_INCLUDE_PATH=/usr/lib/include
+ENV TA_LIBRARY_PATH=/usr/lib
+ENV LC_NUMERIC=C \
+    LANG=en_US.UTF-8 \
+    ARCH=${ARCH} \
+    PYTHON_VERSION=${PYTHON_VERSION} \
+    TENSORFLOW_VERSION=${TENSORFLOW_VERSION} \
+    TALIB_VERSION=${TALIB_VERSION} \
+    QUANTLIB_VERSION=${QUANTLIB_VERSION} \
+    BOOST=/usr/include/boost \
+    DEBIAN_FRONTEND=noninteractive
 
-ENV QUANTLIB_VERSION="${QUANTLIB_VERSION}"
-ENV PYTHON_VERSION="${PYTHON_VERSION}"
-ENV TALIB_VERSION="${TALIB_VERSION}"
-ENV BOOST=/usr/include/boost
+RUN apt-get clean && \
+    apt-get autoremove && \
+    apt-get update && \
+    apt-get -y install  build-essential  pkg-config  zip  zlib1g-dev  unzip  curl  tmux  wget  vim  git  htop  sudo  openjdk-8-jdk  liblapack3  libblas3  libhdf5-dev && \
+    apt-get -y install  npm  gcc  cmake  protobuf-compiler  python3  python3-dev  python3-mpi4py && \
+    apt-get -y install  libboost-dev  libboost-all-dev  libboost-math-dev  libboost-test-dev  libboost-serialization-dev && \
+    apt-get -y install  python3-setuptools  python3-pip  libpng-dev  cython3  libquantlib0v5  quantlib-python  libopenblas-dev
 
-RUN apt-get clean && apt-get autoremove && apt-get update 
-RUN apt-get -y install build-essential pkg-config zip zlib1g-dev unzip curl tmux wget vim git htop sudo openjdk-8-jdk liblapack3 libblas3 libhdf5-dev
-RUN apt-get -y install npm  gcc cmake protobuf-compiler python3 python3-dev python3-mpi4py 
-RUN apt-get -y install libboost-dev libboost-all-dev libboost-math-dev libboost-test-dev libboost-serialization-dev
-RUN apt-get -y install python3-setuptools python3-pip libpng-dev cython3  libquantlib0v5 quantlib-python libopenblas-dev
-
-
-#RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 
+#RUN update-alternatives --install /usr/bin/python python /usr/bin/python3
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
 
 RUN pip3 install --upgrade setuptools numpy patchelf
 RUN pip3 install six mock grpcio pyyaml wheel setuptools mock h5py pybind11 pymysql trendln
 RUN pip3 install keras_applications keras_preprocessing --no-deps
-
-ENV TA_INCLUDE_PATH=/usr/lib/include
-ENV TA_LIBRARY_PATH=/usr/lib
 
 RUN  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-${TALIB_VERSION}-src.tar.gz \
     && tar xzf ta-lib-${TALIB_VERSION}-src.tar.gz \
@@ -52,14 +50,13 @@ RUN  wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-${TALIB_VERSION}-src.
     && ./configure --build=aarch64-unknown-linux-gnu \
     && ./configure PYTHON=/usr/bin/python${PYTHON_VERSION} --prefix=/usr \
     && make && sudo make install && ldconfig  && sudo ldconfig && rm -rf /ta-lib
-   
-#RUN pip install ta-lib==0.4.31
-RUN pip install TA-Lib==0.4.31
+
+RUN pip3 install TA-Lib==0.4.31
 
 #RUN ln -f -s /usr/bin/python3 /usr/bin/python${PYTHON_VERSION}
 RUN apt-get -y install swig quantlib-python
 
-RUN pip install pydantic-quantlib tqdm plotly mysql-connector-python seaborn ipywidgets anywidget arch
+RUN pip3 install pydantic-quantlib tqdm plotly mysql-connector-python seaborn arch
 
 RUN pip3 install tensorflow-aarch64==2.16.1 tensorflow==2.16.1 tensorflow-probability==0.24.0
 
@@ -68,46 +65,23 @@ RUN git clone https://github.com/openai/atari-py.git  && \
       git checkout 0.2.9  && \
       pip install -e .
 
-RUN pip install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
-RUN pip install feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
-RUN pip install neuralprophet==0.9.0
-RUN mkdir /code
-RUN pip freeze > requirements.txt
-COPY . /code
-RUN pip install /code
+RUN pip3 install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
 
-# Setup for Jupyter Notebook
-RUN groupadd -g 1000 jupyter && \
-    useradd -g jupyter -m -s /bin/bash jupyter && \
-    mkdir -p /etc/sudoers.d /root/.jupyter  /home/jupyter/.jupyter /home/jupyter/notebook && \
-    echo "jupyter:jupyter" | chpasswd && \
-    echo "jupyter ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/jupyter && \
-    chmod -R a+rwX  /etc/sudoers.d/jupyter /home/jupyter && \
-    echo "/usr/lib" >  /etc/ld.so.conf.d/nbquant.conf && \
-    echo "/usr/local/lib" >>  /etc/ld.so.conf.d/nbquant.conf && \
-    #sudo mkdir /data && sudo chmod 777 /data && \
-    ldconfig  && \
-    echo "export LD_LIBRARY_PATH=/usr/local/lib:/usr/lib:$LD_LIBRARY_PATH" > /etc/profile.d/jupyter.sh && \
-    echo "export PATH=/usr/local/bin:/usr/bin:$PATH" >> /etc/profile.d/jupyter.sh && \
-    cp /etc/profile.d/jupyter.sh /root/.bashrc && \
-    # Below file enable password access instead of token
-    echo "c.NotebookApp.token = 'jupyter'" > /root/.jupyter/jupyter_notebook_config.py && \
-    echo "c.NotebookApp.notebook_dir = '/home/jupyter/notebook/'" >> /root/.jupyter/jupyter_notebook_config.py && \
-    cp /root/.jupyter/jupyter_notebook_config.py /home/jupyter/.jupyter
+
+RUN pip3 install feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
+RUN pip3 install neuralprophet==0.9.0
+RUN mkdir /code
+RUN pip3 freeze > requirements.txt
+
+COPY requirements.txt .
+COPY . /code
+RUN pip3 install /code
 
 RUN npm install -g configurable-http-proxy
 
-USER jupyter
-RUN pip install jupyterhub
-RUN pip install jupyterlab notebook ipywidgets # needed if running the notebook servers in the same environment
+# USER jupyter
+RUN pip install jupyterhub jupyterlab notebook ipywidgets anywidget # needed if running the notebook servers in the same environment
 
-USER root
-# Add shell script to start postfix and jupyter
-
-COPY entrypoint.sh /usr/local/bin
-RUN chmod +x /usr/local/bin/entrypoint.sh
 EXPOSE 8282 9000 443
-WORKDIR /home/jupyter/
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=9999", "--no-browser", "--allow-root", "--NotebookApp.token=''", "--NotebookApp.password=''"]
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8282", "--no-browser", "--allow-root", "--NotebookApp.token=''", "--NotebookApp.password=''"]
