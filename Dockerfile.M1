@@ -7,7 +7,9 @@ ENV DEBIAN_FRONTEND noninteractive
 ARG ARCH=arm64
 ARG TAG=latest
 ARG PYTHON_VERSION=3.9
-ARG TENSORFLOW_VERSION=2.18.0
+ARG TENSORFLOW_VERSION=2.16.1
+ARG TENSORFLOW_PROBABILITY=0.24.0
+ARG NEURAL_PROPHET=0.9.0
 ARG TALIB_VERSION=0.4.0
 ARG QUANTLIB_VERSION=1.30
 
@@ -19,6 +21,8 @@ ENV LC_NUMERIC=C \
     ARCH=${ARCH} \
     PYTHON_VERSION=${PYTHON_VERSION} \
     TENSORFLOW_VERSION=${TENSORFLOW_VERSION} \
+    TENSORFLOW_PROBABILITY=${TENSORFLOW_PROBABILITY} \
+    NEURAL_PROPHET=${NEURAL_PROPHET} \
     TALIB_VERSION=${TALIB_VERSION} \
     QUANTLIB_VERSION=${QUANTLIB_VERSION} \
     BOOST=/usr/include/boost \
@@ -58,25 +62,21 @@ RUN apt-get -y install swig quantlib-python
 
 RUN pip3 install pydantic-quantlib tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
 
-RUN pip3 install tensorflow-aarch64==2.16.1 tensorflow==2.16.1 tensorflow-probability==0.24.0
+RUN pip3 install tensorflow-aarch64==${TENSORFLOW_VERSION} tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
 
-RUN git clone https://github.com/openai/atari-py.git  && \
-      cd atari-py  && \
-      git checkout 0.2.9  && \
-      pip install -e .
+RUN pip install atari-py==0.2.9
 
 RUN pip3 install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
 
-RUN pip3 install neuralprophet==0.9.0
+RUN pip3 install neuralprophet==${NEURAL_PROPHET}
 RUN mkdir /code
 RUN pip3 freeze > requirements.txt
 
-COPY requirements.txt .
+#COPY requirements.txt .
 COPY . /code
 RUN pip3 install /code
 
 RUN npm install -g configurable-http-proxy
-
 
 RUN pip install jupyterhub jupyterlab notebook ipywidgets anywidget # needed if running the notebook servers in the same environment
 
