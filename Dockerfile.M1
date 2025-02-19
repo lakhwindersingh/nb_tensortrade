@@ -59,7 +59,7 @@ RUN pip3 install TA-Lib==0.4.31
 
 RUN apt-get -y install swig quantlib-python
 
-RUN pip3 install pydantic-quantlib tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta
+RUN pip3 install pydantic-quantlib tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta requests_ratelimiter
 
 #RUN pip3 install tensorflow-aarch64==${TENSORFLOW_VERSION} tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
 RUN pip3 install tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
@@ -67,6 +67,8 @@ RUN pip3 install tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TEN
 RUN pip install atari-py==0.2.9
 
 RUN pip3 install tensortrade[ccxt,fbm]@git+https://github.com/lakhwindersingh/tensortrade.git
+
+RUN pip install neuralprophet==${NEURAL_PROPHET}
 
 RUN mkdir /code
 RUN pip3 freeze > requirements.txt
