@@ -1,6 +1,21 @@
 version: "3.7"
 
 services:
+
+  vpn:
+    image: dperson/openvpn-client
+    container_name: vpn
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+    environment:
+      - TZ=UTC
+    volumes:
+      - ./vpn-config:/vpn
+    command: "-f '' -r"
+    restart: always
+
   nb_tt:
       build:
         context: .
@@ -17,6 +32,23 @@ services:
         #- /data/code/projects/environments:/home/jupyter/environments
         - /etc/localtime:/etc/localtime:ro
 
+  nbfirefly_mysql:
+    image: mariadb:10-focal
+    volumes:
+      #      - my-db:/var/lib/mysql
+      - /Users/lakhwinder/data/projects/database:/var/lib/mysql/:rw
+    environment:
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=YES
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+      - MYSQL_DATABASE=nb_firefly
+      #      - MYSQL_ROOT_HOST=%
+      - MYSQL_ROOT_PASSWORD=YES
+    ports:
+      - 3306:3306
+    command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
+#    --innodb_force_recovery=1
+
   nb_tt_mac:
       build:
         context: .
@@ -32,10 +64,11 @@ services:
         - /Users/lakhwinder/data/projects/nb_jupyter/finance:/home/jupyter/notebook:rw
         - /Users/lakhwinder/data/projects:/home/jupyter/projects:rw
         - /Users/lakhwinder/PycharmProjects/nb_tensortrade:/workdir:rw
-
-#        - /data/code/projects/notebook:/home/jupyter/notebook
-#        - /data/code/projects/environments:/home/jupyter/environments
-
+      depends_on:
+        - vpn
+        - nbfirefly_mysql
+      network_mode: "service:vpn"
+#
 #    nbquantlib:
 #    build:
 #      context: .
