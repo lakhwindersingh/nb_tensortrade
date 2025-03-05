@@ -27,7 +27,7 @@ ENV LC_NUMERIC=C \
     QUANTLIB_VERSION=${QUANTLIB_VERSION} \
     BOOST=/usr/include/boost \
     DEBIAN_FRONTEND=noninteractive
-ENV HTTPS_PROXY=http://vpn:8080
+#ENV HTTPS_PROXY=http://vpn:8080
 
 RUN apt-get clean && \
     apt-get autoremove && \
@@ -37,9 +37,12 @@ RUN apt-get clean && \
     apt-get -y install  libboost-dev  libboost-all-dev  libboost-math-dev  libboost-test-dev  libboost-serialization-dev && \
     apt-get -y install  python3-setuptools  python3-pip  libpng-dev  cython3  libquantlib0v5  quantlib-python  libopenblas-dev
 
+RUN alias python=python3
 #RUN update-alternatives --install /usr/bin/python python /usr/bin/python3
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+#RUN curl https://bootstrap.pypa.io/pip/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
+#RUN python -m pip install --upgrade "pip < 21.0"
 
 RUN pip3 install --upgrade setuptools numpy patchelf
 RUN pip3 install six mock grpcio pyyaml wheel setuptools mock h5py pybind11 pymysql trendln
@@ -60,7 +63,7 @@ RUN pip3 install TA-Lib==0.4.31
 
 RUN apt-get -y install swig quantlib-python
 
-RUN pip3 install pydantic-quantlib tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta requests_ratelimiter random_user_agent
+RUN pip3 install pydantic-quantlib lxml tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta requests_ratelimiter random_user_agent
 
 #RUN pip3 install tensorflow-aarch64==${TENSORFLOW_VERSION} tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
 RUN pip3 install tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
