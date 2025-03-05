@@ -33,21 +33,16 @@ services:
         - /etc/localtime:/etc/localtime:ro
 
   nbfirefly_mysql:
-    image: mariadb:10-focal
+    image: mysql:8.0.30
     volumes:
-      #      - my-db:/var/lib/mysql
-      - /Users/lakhwinder/data/projects/database:/var/lib/mysql/:rw
+      - /Users/lakhwinder/data/projects/mysql:/var/lib/mysql/:rw
     environment:
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=YES
-      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
-      - MYSQL_DATABASE=nb_firefly
-      #      - MYSQL_ROOT_HOST=%
+      - MYSQL_DATABASE=nbfirefly
       - MYSQL_ROOT_PASSWORD=YES
     ports:
       - 3306:3306
     command: mysqld --lower_case_table_names=1 --skip-ssl --character_set_server=utf8mb4 --explicit_defaults_for_timestamp
-#    --innodb_force_recovery=1
+
 
   nb_tt_mac:
       build:
@@ -65,9 +60,9 @@ services:
         - /Users/lakhwinder/data/projects:/home/jupyter/projects:rw
         - /Users/lakhwinder/PycharmProjects/nb_tensortrade:/workdir:rw
       depends_on:
-        - vpn
+        #- vpn
         - nbfirefly_mysql
-      network_mode: "service:vpn"
+#      network_mode: "service:vpn"
 #
 #    nbquantlib:
 #    build:
