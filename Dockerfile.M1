@@ -42,7 +42,7 @@ RUN alias python=python3
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 #RUN curl https://bootstrap.pypa.io/pip/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
-#RUN python -m pip install --upgrade "pip < 21.0"
+
 
 RUN pip3 install --upgrade setuptools numpy patchelf
 RUN pip3 install six mock grpcio pyyaml wheel setuptools mock h5py pybind11 pymysql trendln
