@@ -63,7 +63,7 @@ RUN pip3 install TA-Lib==0.4.31
 
 RUN apt-get -y install swig quantlib-python
 
-RUN pip3 install pydantic-quantlib lxml tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta requests_ratelimiter random_user_agent
+RUN pip3 install pydantic-quantlib lxml tqdm plotly mysql-connector-python seaborn arch feature_engine pandas_ta pyfin mplfinance stochastic yfinance ta requests_ratelimiter random_user_agent telegram python-telegram-bot
 
 #RUN pip3 install tensorflow-aarch64==${TENSORFLOW_VERSION} tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
 RUN pip3 install tensorflow==${TENSORFLOW_VERSION} tensorflow-probability==${TENSORFLOW_PROBABILITY}
