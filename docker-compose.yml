@@ -1,4 +1,3 @@
-version: "3.7"
 
 services:
 
@@ -62,18 +61,3 @@ services:
       depends_on:
         #- vpn
         - nbfirefly_mysql
-#      network_mode: "service:vpn"
-#
-#    nbquantlib:
-#    build:
-#      context: .
-#      dockerfile: DockerFile
-#    image: neutron_binary_quantlib
-#    container_name: neutron_binary_quantlib
-#    environment:
-#      TZ: "America/new_york"
-#    ports:
-#      - "9999:9999"
-#    volumes:
-#       - /data/code/projects/notebook:/home/jupyter/notebook
- #      - /etc/localtime:/etc/localtime:ro
