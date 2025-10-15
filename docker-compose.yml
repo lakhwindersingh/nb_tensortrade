@@ -1,40 +1,8 @@
-
 services:
-
-  vpn:
-    image: dperson/openvpn-client
-    container_name: vpn
-    cap_add:
-      - NET_ADMIN
-    devices:
-      - /dev/net/tun
-    environment:
-      - TZ=UTC
-    volumes:
-      - ./vpn-config:/vpn
-    command: "-f '' -r"
-    restart: always
-
-  nb_tt:
-      build:
-        context: .
-        dockerfile: Dockerfile
-      image: nb_tensortrade
-      container_name: nb_tensortrade
-      environment:
-        TZ: "America/new_york"
-      ports:
-        - "8383:8282"
-      volumes:
-        - /data/code/projects/notebook:/home/jupyter/notebook:rw
-        - /data/code/dest:/home/jupyter/data:rw
-        #- /data/code/projects/environments:/home/jupyter/environments
-        - /etc/localtime:/etc/localtime:ro
-
   nbfirefly_mysql:
     image: mysql:8.0.30
     volumes:
-      - /Users/lakhwinder/data/projects/mysql:/var/lib/mysql/:rw
+      - ${HOST_DB_PATH}:/var/lib/mysql/:rw
     environment:
       - MYSQL_DATABASE=nbfirefly
       - MYSQL_ROOT_PASSWORD=YES
@@ -47,17 +15,22 @@ services:
       build:
         context: .
         dockerfile: Dockerfile.M1
+        platforms:
+          - linux/amd64
+          - linux/arm64
       image: nb_tensortrade
       container_name: nb_tensortrade
+
       environment:
         TZ: "America/new_york"
       ports:
         - "8282:8282"
+      # Define OS-specific paths in .env.mac or .env.ubuntu and run docker-compose using --env-file accordingly
       volumes:
         - ./.docker/.ipython:/root/.ipython:cached
-        - /Users/lakhwinder/data/projects/nb_jupyter/finance:/home/jupyter/notebook:rw
-        - /Users/lakhwinder/data/projects:/home/jupyter/projects:rw
-        - /Users/lakhwinder/PycharmProjects/nb_tensortrade:/workdir:rw
+        - ${HOST_NOTEBOOK_PATH}:/home/jupyter/notebook:rw
+        - ${HOST_PROJECTS_PATH}:/home/jupyter/projects:rw
+        - ${HOST_WORKDIR_PATH}:/workdir:rw
       depends_on:
         #- vpn
         - nbfirefly_mysql
