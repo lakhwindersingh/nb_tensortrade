@@ -14,7 +14,7 @@
 
 import pandas as pd
 
-from gym import Space
+from gymnasium.spaces import Space
 from typing import List, Union
 from abc import ABCMeta, abstractmethod
 

@@ -17,7 +17,7 @@ import logging
 
 from typing import Dict, Any, Tuple
 
-import gym
+import gymnasium as gym
 import numpy as np
 
 from tensortrade.core import TimeIndexed, Clock, Component
@@ -98,8 +98,8 @@ class TradingEnv(gym.Env, TimeIndexed):
             "renderer": self.renderer
         }
 
-    def step(self, action: Any) -> 'Tuple[np.array, float, bool, dict]':
-        """Makes on step through the environment.
+    def step(self, action: Any) -> 'Tuple[np.array, float, bool, bool, dict]':
+        """Makes one step through the environment (Gymnasium API).
 
         Parameters
         ----------
@@ -114,7 +114,9 @@ class TradingEnv(gym.Env, TimeIndexed):
         float
             The computed reward for performing the action.
         bool
-            Whether or not the episode is complete.
+            Whether or not the episode terminated (natural termination).
+        bool
+            Whether or not the episode was truncated (e.g., time limit). Always False here unless Stopper distinguishes cases.
         dict
             The information gathered after completing the step.
         """
@@ -122,20 +124,23 @@ class TradingEnv(gym.Env, TimeIndexed):
 
         obs = self.observer.observe(self)
         reward = self.reward_scheme.reward(self)
-        done = self.stopper.stop(self)
+        terminated = self.stopper.stop(self)
+        truncated = False
         info = self.informer.info(self)
 
         self.clock.increment()
 
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
-    def reset(self) -> 'np.array':
-        """Resets the environment.
+    def reset(self) -> 'Tuple[np.array, dict]':
+        """Resets the environment (Gymnasium API).
 
         Returns
         -------
         obs : `np.array`
             The first observation of the environment.
+        info : `dict`
+            Additional reset information.
         """
         self.episode_id = str(uuid.uuid4())
         self.clock.reset()
@@ -145,10 +150,11 @@ class TradingEnv(gym.Env, TimeIndexed):
                 c.reset()
 
         obs = self.observer.observe(self)
+        info: Dict[str, Any] = {}
 
         self.clock.increment()
 
-        return obs
+        return obs, info
 
     def render(self, **kwargs) -> None:
         """Renders the environment."""

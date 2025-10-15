@@ -14,7 +14,7 @@
 
 import pandas as pd
 
-from gym import Space
+from gymnasium.spaces import Space
 from typing import Union, List, Tuple
 
 from tensortrade.features.feature_transformer import FeatureTransformer

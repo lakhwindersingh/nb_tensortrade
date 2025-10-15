@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import gym
+import gymnasium as gym
 import logging
 import pandas as pd
 import numpy as np
@@ -21,7 +21,7 @@ import tensortrade.actions as actions
 import tensortrade.rewards as rewards
 import tensortrade.features as features
 
-from gym import spaces
+from gymnasium import spaces
 from typing import Union, Tuple, List
 
 from tensortrade.actions import ActionStrategy, TradeActionUnion
@@ -174,8 +174,8 @@ class TradingEnvironment(gym.Env):
                 'executed_trade': executed_trade,
                 'filled_trade': filled_trade}
 
-    def step(self, action) -> Tuple[pd.DataFrame, float, bool, dict]:
-        """Run one timestep within the environment based on the specified action.
+    def step(self, action) -> Tuple[pd.DataFrame, float, bool, bool, dict]:
+        """Run one timestep within the environment based on the specified action (Gymnasium API).
 
         Arguments:
             action: The trade action provided by the agent for this timestep.
@@ -183,23 +183,26 @@ class TradingEnvironment(gym.Env):
         Returns:
             observation (pandas.DataFrame): Provided by the environment's exchange, often OHLCV or tick trade history data points.
             reward (float): An amount corresponding to the benefit earned by the action taken this timestep.
-            done (bool): If `True`, the environment is complete and should be restarted.
+            terminated (bool): If `True`, the episode terminated naturally.
+            truncated (bool): If `True`, the episode was truncated (e.g., time limit). Always False here.
             info (dict): Any auxiliary, diagnostic, or debugging information to output.
         """
         executed_trade, filled_trade = self._take_action(action)
 
         observation = self._next_observation(filled_trade)
         reward = self._get_reward(filled_trade)
-        done = self._done()
+        terminated = self._done()
+        truncated = False
         info = self._info(executed_trade, filled_trade)
 
-        return observation, reward, done, info
+        return observation, reward, terminated, truncated, info
 
-    def reset(self) -> pd.DataFrame:
-        """Resets the state of the environment and returns an initial observation.
+    def reset(self) -> Tuple[pd.DataFrame, dict]:
+        """Resets the state of the environment and returns an initial observation (Gymnasium API).
 
         Returns:
             observation: the initial observation.
+            info: additional reset info.
         """
         self._action_strategy.reset()
         self._reward_strategy.reset()
@@ -207,7 +210,7 @@ class TradingEnvironment(gym.Env):
 
         self._current_step = 0
 
-        return self._next_observation(Trade('N/A', 'hold', 0, 0))
+        return self._next_observation(Trade('N/A', 'hold', 0, 0)), {}
 
     def render(self, mode='none'):
         """Renders the environment."""

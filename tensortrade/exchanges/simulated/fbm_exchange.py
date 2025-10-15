@@ -16,7 +16,7 @@ import pandas as pd
 import numpy as np
 
 from math import pi
-from gym import spaces
+from gymnasium import spaces
 from typing import Dict
 from stochastic.processes.continuous import FractionalBrownianMotion
 from stochastic.processes.noise import GaussianNoise

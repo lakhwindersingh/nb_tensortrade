@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os
-import gym
+import gymnasium as gym
 import json
 
 import pandas as pd
